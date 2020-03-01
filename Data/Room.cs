@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RogueGame.Control;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -16,9 +17,27 @@ namespace RogueGame.Data
 		private List<Road> roads;
 		private List<Enemy> enemies;
 		private GameObject[][] roomObjects;
-		public bool IsExplored { get; set; }
-		public bool isActive { get; set; }
+		private bool isExplored;
+		private bool isActive;
 		public GameObject[][] RoomObjects { get => roomObjects; }
+		public int X { get => x;  }
+		public int Y { get => y; }
+		public int Width { get => width;  }
+		public int Height { get => height;  }
+		public bool IsExplored { get => isExplored; }
+		public bool IsActive {
+			get => isActive;
+			set
+			{
+				isActive = value;
+				if (isActive)
+				{
+					isExplored = true;
+				}
+			} 
+		}
+
+		internal RoomType RoomType { get => roomType; set => roomType = value; }
 
 		public Room(int x, int y, int width, int height)
 		{
@@ -39,7 +58,10 @@ namespace RogueGame.Data
 
 		}
 
-		
+		internal void AddReplaceObject(GameObject start)
+		{
+			roomObjects[start.x-x][start.y-y] = start;			
+		}
 
 		private void FillWalls()
 		{
@@ -63,7 +85,31 @@ namespace RogueGame.Data
 			
 		}
 
+		private ArrayElementsStruct XYToArrayElements(GameObject gameObject)
+		{
+			return new ArrayElementsStruct(gameObject.x - x, gameObject.y - y);
+		}
+		private ArrayElementsStruct XYToArrayElements(int x, int y)
+		{
+			return new ArrayElementsStruct(x - this.x, y - this.y);
+		}
 
-		
+		internal GameObject GetObject(int x, int y)
+		{
+			ArrayElementsStruct coord = XYToArrayElements(x, y);
+			return roomObjects[coord.x][coord.y];
+		}
+
+		internal void MoveObject(int oldX, int oldY, Hero hero)
+		{
+			AddReplaceObject(hero);
+			RemoveObject(oldX, oldY);
+		}
+
+		internal void RemoveObject(int oldX, int oldY)
+		{
+			ArrayElementsStruct coord = XYToArrayElements(oldX, oldY);
+			roomObjects[coord.x][coord.y] = null;
+		}
 	}
 }

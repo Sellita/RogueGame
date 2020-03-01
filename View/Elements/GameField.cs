@@ -13,6 +13,27 @@ namespace RogueGame.View.Elements
 
 		}
 
+		public void RenderRoad(Road road)
+		{
+			LinkedListNode<RoadBlock> roadBloc = road.RoadBlocks.First;
+			while(roadBloc != null)
+			{
+				if (roadBloc.Value.IsExplored)
+				{
+					if (!roadBloc.Value.IsExistObject())
+					{
+						RenderObject(roadBloc.Value);
+					}
+					else
+					{
+						RenderObject(roadBloc.Value.getLastObject());
+					}
+					
+				}
+				roadBloc = roadBloc.Next;
+			}
+		}
+
 		public void RenderRoom(Room room)
 		{
 			for (int i = 0; i < room.RoomObjects.Length; i++)
@@ -25,13 +46,13 @@ namespace RogueGame.View.Elements
 					}
 					else
 					{
-						if (room.isActive)
+						if (room.IsActive)
 						{
-							RenderCoord(room.RoomObjects[i][0].x, room.RoomObjects[i][0].y+j, '.');
+							RenderCoord(room.X+i, room.Y+j, '.');
 						}
 						else
 						{
-							RenderCoord(room.RoomObjects[i][0].x, room.RoomObjects[i][0].y + j, ' ');
+							RenderCoord(room.X+i, room.Y + j, ' ');
 						}
 					}
 				}

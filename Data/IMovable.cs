@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using RogueGame.Control;
 
 namespace RogueGame.Data
 {
-	enum RoomType
+	interface IMovable
 	{
-		Standart,
-		Bonus,
-		Boss,
-		Hard,
-		Start
+		public void Move(Directions direction);
 	}
 }

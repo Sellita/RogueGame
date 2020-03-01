@@ -4,12 +4,7 @@ using System.Text;
 
 namespace RogueGame.Data
 {
-	enum RoomType
+	class Potion
 	{
-		Standart,
-		Bonus,
-		Boss,
-		Hard,
-		Start
 	}
 }

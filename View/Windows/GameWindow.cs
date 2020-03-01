@@ -64,5 +64,10 @@ namespace RogueGame.View.Windows
 			speed.Render();
 			atack.Render();
 		}
+
+		internal void RenderRoad(Road road)
+		{
+			gameField.RenderRoad(road);
+		}
 	}
 }
