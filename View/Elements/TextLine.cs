@@ -8,6 +8,7 @@ namespace RogueGame.View.Elements
 	{
 		private string data;
 		private TextAligment aligment;
+		private bool isActive = false;
 		
 		
 
@@ -22,6 +23,7 @@ namespace RogueGame.View.Elements
 				this.data = data;
 			}
 			this.aligment = aligment;
+			ClearObjectSpace();
 		}
 
 		public string Data { get => data; set {
@@ -29,6 +31,11 @@ namespace RogueGame.View.Elements
 				data = value;
 				Render();
 			} }
+
+		public bool IsActive { get => isActive; set {
+				ClearCurrentText();
+				isActive = value; 
+				Render(); } }
 
 		private void ClearCurrentText()
 		{
@@ -61,6 +68,13 @@ namespace RogueGame.View.Elements
 		{
 			int lx = Console.CursorLeft;
 			int ly = Console.CursorTop;
+			ConsoleColor bgcolor = Console.BackgroundColor;
+			ConsoleColor fgcolor = Console.ForegroundColor;
+			if (IsActive)
+			{
+				Console.BackgroundColor = ConsoleColor.White;
+				Console.ForegroundColor = ConsoleColor.Black;
+			}
 
 			if (aligment == TextAligment.Center)
 			{
@@ -76,6 +90,8 @@ namespace RogueGame.View.Elements
 			}
 			Console.Write(Data);
 
+			Console.BackgroundColor = bgcolor;
+			Console.ForegroundColor = fgcolor;
 			Console.SetCursorPosition(lx, ly);
 		}
 	}

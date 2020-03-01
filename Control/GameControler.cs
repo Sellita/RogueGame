@@ -10,8 +10,12 @@ namespace RogueGame.Control
 {
 	class GameControler
 	{
+		private const int inventorySpace = 10;
+		
 		GameWindow gameWindow;
+
 		Hero hero;
+		GameObject objectUnderHero = null;
 		Level lvl;
 		const string txtRoadBlock = "=";
 		Room activeRoom;
@@ -20,12 +24,18 @@ namespace RogueGame.Control
 		const int exploringBlocksOnRoad = 3;
 		Spawner spawner;
 
+
+
 		public GameControler()
 		{
 			gameWindow = new GameWindow();
+
 			lvl = new Level();
 			GetLevelFromFile("Map.txt");//TODO: change to generation!!!!!!!!!!!
 			AddRoadsToRooms();
+			LvlGenerator.SetRoomsType(lvl.Rooms);
+			spawner = new Spawner();
+			spawner.SpawnAll(lvl.Rooms, lvl.Lvl);
 			//spawner.SpawnEnemy(lvl.Rooms);
 		}
 
@@ -273,8 +283,8 @@ namespace RogueGame.Control
 					roadEndings.Remove(endBlock.y * 101 + endBlock.x);
 
 				}
-				lvl.Rooms[0].IsActive = true;
-				lvl.Rooms[0].RoomType = RoomType.Start;
+				//lvl.Rooms[0].IsActive = true;
+				//lvl.Rooms[0].RoomType = RoomType.Start;
 				/*while((s = map.ReadLine()) != null)
 				{
 					Console.WriteLine(s);
@@ -301,10 +311,18 @@ namespace RogueGame.Control
 			input.Render();
 			string heroName = input.GetText();
 			//create hero
-			hero = new Hero(heroName);
-			activeRoom = lvl.GetActiveRoom();
-			hero.SetStartPosition(activeRoom.X+activeRoom.Width/2, activeRoom.Y+activeRoom.Height/2);
-			gameWindow.Render();			
+			hero = new Hero(heroName, inventorySpace);
+			//positioning hero TODO:
+			//lvl.Rooms[0].IsActive = true;
+			//lvl.Rooms[0].RoomType = RoomType.Start;
+
+
+			activeRoom = lvl.GetStartRoom();
+			ArrayElementsStruct coord = activeRoom.GetEmptyCenter();
+			activeRoom.IsActive = true;
+			hero.SetStartPosition(coord.x, coord.y);
+			gameWindow.Render();	
+			
 			
 			activeRoom.AddReplaceObject(hero);
 
@@ -319,6 +337,7 @@ namespace RogueGame.Control
 			while (isGameStarted)
 			{
 				ConsoleKeyInfo pressedChar = Console.ReadKey(true);
+				ClearTmpHolders();
 				switch (pressedChar.Key)
 				{
 					case ConsoleKey.LeftArrow:
@@ -333,7 +352,14 @@ namespace RogueGame.Control
 					case ConsoleKey.DownArrow:
 						MoveObject(hero, Directions.Down);
 						break;
+					case ConsoleKey.U:
+						IteractWithObject();
+						break;
+					case ConsoleKey.I:
+						OpenInventory();
+						break;
 				}
+				
 			}
 			//game moves only when hero moves
 			
@@ -347,6 +373,62 @@ namespace RogueGame.Control
 			//gameWindow.RenderRoom(room);
 		}
 
+		private void OpenInventory()
+		{
+
+			//todo: open inventory
+			InventoryControler inventoryControler = new InventoryControler(hero.Inventory, hero);
+			inventoryControler.RunLoop();
+
+			gameWindow.Render();
+			RenderExploriedGameField();
+			//throw new NotImplementedException();
+		}
+
+		private void RenderExploriedGameField()
+		{
+
+			foreach (Room room in lvl.Rooms)
+			{
+				if (room.IsExplored)
+				{
+					gameWindow.RenderRoom(room);
+				}
+			}
+			foreach (Road road in lvl.Roads)
+			{
+				if (road.IsExplored)
+				{
+					gameWindow.RenderRoad(road);
+				}
+			}
+		}
+
+		private void ClearTmpHolders()
+		{
+			gameWindow.SetkeyInfoHolder3("");
+			gameWindow.SetInfoHolder("");
+			gameWindow.SetErorHolder("");
+		}
+
+		private void IteractWithObject()
+		{
+			if(objectUnderHero is Equipment)
+			{
+				Equipment eq = objectUnderHero as Equipment;
+				if (hero.Inventory.IsInventoryFull())
+				{
+					gameWindow.SetErorHolder("Inventory full!");
+				}
+				else
+				{
+					hero.Inventory.AddItem(objectUnderHero);
+					activeRoom.RemoveObject(objectUnderHero);
+					objectUnderHero = null;
+				}
+			}
+		}
+
 		private void MoveObject(GameObject gameObject, Directions directions)
 		{
 			int oldX = gameObject.x;
@@ -358,16 +440,16 @@ namespace RogueGame.Control
 				switch (directions)
 				{
 					case Directions.Left:
-						objectInMovingPlacee = activeRoom.GetObject(gameObject.x - 1, gameObject.y);
+						objectInMovingPlacee = activeRoom.GetFirstObject(gameObject.x - 1, gameObject.y);
 						break;
 					case Directions.Right:
-						objectInMovingPlacee = activeRoom.GetObject(gameObject.x + 1, gameObject.y);
+						objectInMovingPlacee = activeRoom.GetFirstObject(gameObject.x + 1, gameObject.y);
 						break;
 					case Directions.Up:
-						objectInMovingPlacee = activeRoom.GetObject(gameObject.x, gameObject.y - 1);
+						objectInMovingPlacee = activeRoom.GetFirstObject(gameObject.x, gameObject.y - 1);
 						break;
 					case Directions.Down:
-						objectInMovingPlacee = activeRoom.GetObject(gameObject.x, gameObject.y + 1);
+						objectInMovingPlacee = activeRoom.GetFirstObject(gameObject.x, gameObject.y + 1);
 						break;
 					default:
 						break;
@@ -375,13 +457,25 @@ namespace RogueGame.Control
 				if (objectInMovingPlacee != null)
 				{
 					//TODO: susidurimo apdirbimas
+					if (objectInMovingPlacee.isColizionable)
+					{
+						//zengem ant objekto
+						hero.Move(directions);
+						activeRoom.MoveObject(oldX, oldY, hero);
+						objectUnderHero = objectInMovingPlacee;
+
+						//write text in infoHolder
+						WriteObjectInfoInHolders(objectUnderHero);
+						
+						
+					}
 
 					if (objectInMovingPlacee is RoadBlock)
 					{
 						//perduodam valdyma keliui
 						RoadBlock roadToMove = objectInMovingPlacee as RoadBlock;
 						
-						activeRoom.RemoveObject(oldX, oldY);
+						activeRoom.RemoveObject(oldX, oldY, hero);
 						
 						activeRoad = roadToMove.Road;
 						activeRoad.IsActive = true;
@@ -393,8 +487,7 @@ namespace RogueGame.Control
 						gameWindow.RenderRoom(activeRoom);
 						
 						
-						activeRoom = null;
-						
+						activeRoom = null;						
 					}
 
 				}
@@ -420,7 +513,7 @@ namespace RogueGame.Control
 				LinkedListNode<RoadBlock> previousPosition = curentPosition.Previous;
 				LinkedListNode<RoadBlock> nodeMoveTo = null;
 				GameObject objectInMovingPlacee = null;
-				//jei aktivuotas лудшфы, tai juda kelias
+				//jei aktivuotas kelias, tai juda kelias
 				int newX = -1;
 				int newY = -1;
 				switch (directions)
@@ -497,27 +590,55 @@ namespace RogueGame.Control
 			
 		}
 
+		private void WriteObjectInfoInHolders(GameObject gameObject)
+		{
+			string textToWrite = $"You found {gameObject.Name} with:";
+
+			if(gameObject is Equipment)
+			{
+				Equipment eq = gameObject as Equipment;
+				if (eq.Damage > 0)
+				{
+					textToWrite +=" Damage: " + eq.Damage;
+				}
+				if (eq.Defense > 0)
+				{
+					textToWrite += " Defense: " + eq.Defense;
+				}
+				gameWindow.SetkeyInfoHolder3("[U] to Pick up");
+			}
+			
+			gameWindow.SetInfoHolder(textToWrite);
+		}
+
 		private bool TryActivateRoom(int x, int y, Directions directions)
 		{
 			switch (directions)
 			{
 				case Directions.Left:
-					activeRoom = lvl.GetRommWithCoord(x - 1, y);
+					x--;
 					break;
 				case Directions.Right:
-					activeRoom = lvl.GetRommWithCoord(x + 1, y);
+					x++;
 					break;
 				case Directions.Up:
-					activeRoom = lvl.GetRommWithCoord(x, y - 1);
+					y--;
 					break;
 				case Directions.Down:
-					activeRoom = lvl.GetRommWithCoord(x, y + 1);
+					y++;
 					break;
 				default:
 					break;
 			}
+			activeRoom = lvl.GetRommWithCoord(x, y);
 			if (activeRoom != null)
 			{
+				//patikriname ar musu koordinate nebus siena
+				if(activeRoom.GetFirstObject(x, y) is WallBlock)
+				{
+					activeRoom = null;
+					return false;
+				}
 				activeRoom.IsActive = true;
 				return true;
 			}

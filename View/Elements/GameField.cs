@@ -40,9 +40,9 @@ namespace RogueGame.View.Elements
 			{
 				for (int j = 0; j < room.RoomObjects[i].Length; j++)
 				{
-					if (room.RoomObjects[i][j] != null)
+					if (room.RoomObjects[i][j].Count != 0)
 					{
-						RenderObject(room.RoomObjects[i][j]);
+						RenderObject(room.RoomObjects[i][j][room.RoomObjects[i][j].Count-1]);
 					}
 					else
 					{

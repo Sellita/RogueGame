@@ -10,6 +10,8 @@ namespace RogueGame.View.Elements
 		private readonly string atribute;
 		private TextLine atributeText;
 		private TextLine dataText;
+		private bool isActive = false;
+	
 
 		public string Data { get => data;
 			set {
@@ -17,6 +19,13 @@ namespace RogueGame.View.Elements
 				data = value;
 				dataText.Data = data;
 
+			} }
+
+		public bool IsActive { get => isActive; set { 
+				
+				isActive = value;
+				atributeText.IsActive = value;
+				dataText.IsActive = value;
 			} }
 
 		public AtributeTextLine(int x, int y, int width, string data, string atribute) : base(x, y, width, 1)

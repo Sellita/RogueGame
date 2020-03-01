@@ -8,6 +8,10 @@ namespace RogueGame.Data
 	{
 		List<Room> rooms;
 		List<Road> roads;
+		public int Lvl { get; set; } = 1;
+
+		public static int BossLvlCount = 0;
+		public static int StartLvlCount = 0;
 
 		internal List<Room> Rooms { get => rooms; set => rooms = value; }
 		internal List<Road> Roads { get => roads; set => roads = value; }
@@ -35,7 +39,7 @@ namespace RogueGame.Data
 
 		internal Room GetRommWithCoord(int x, int y)
 		{
-			List<Room> output = rooms.FindAll(room=>(room.X <= x && (room.X + room.Width) >= x) && (room.Y <= y && (room.Y + room.Height) >= y));
+			List<Room> output = rooms.FindAll(room=>(room.X <= x && (room.X + room.Width) > x) && (room.Y <= y && (room.Y + room.Height) > y));
 			//todo: patikrinti
 			if (output.Count > 0)
 			{
@@ -47,6 +51,13 @@ namespace RogueGame.Data
 		internal Room GetActiveRoom()
 		{
 			List<Room> output = rooms.FindAll(room =>room.IsActive);
+			//todo: patikrinti
+			return output[0];
+		}
+
+		internal Room GetStartRoom()
+		{
+			List<Room> output = rooms.FindAll(room => room.RoomType == RoomType.Start);
 			//todo: patikrinti
 			return output[0];
 		}

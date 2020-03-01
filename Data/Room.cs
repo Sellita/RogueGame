@@ -14,12 +14,16 @@ namespace RogueGame.Data
 		private int width;
 		private int height;
 		private RoomType roomType;
+		public bool IsRoomtypeInitialized = false;
 		private List<Road> roads;
+
+
+
 		private List<Enemy> enemies;
-		private GameObject[][] roomObjects;
+		private List<GameObject>[][] roomObjects;
 		private bool isExplored;
 		private bool isActive;
-		public GameObject[][] RoomObjects { get => roomObjects; }
+		public List<GameObject>[][] RoomObjects { get => roomObjects; }
 		public int X { get => x;  }
 		public int Y { get => y; }
 		public int Width { get => width;  }
@@ -37,7 +41,7 @@ namespace RogueGame.Data
 			} 
 		}
 
-		internal RoomType RoomType { get => roomType; set => roomType = value; }
+		internal RoomType RoomType { get => roomType; set { roomType = value; IsRoomtypeInitialized = true; } }
 
 		public Room(int x, int y, int width, int height)
 		{
@@ -49,10 +53,14 @@ namespace RogueGame.Data
 			this.height = height;
 
 			//create empty field
-			roomObjects = new GameObject[width][];
+			roomObjects = new List<GameObject>[width][];
 			for (int i = 0; i < roomObjects.Length; i++)
 			{
-				roomObjects[i] = new GameObject[height];
+				roomObjects[i] = new List<GameObject>[height];
+				for (int j = 0; j < roomObjects[i].Length; j++)
+				{
+					roomObjects[i][j] = new List<GameObject>();
+				}
 			}
 			FillWalls();
 
@@ -60,8 +68,15 @@ namespace RogueGame.Data
 
 		internal void AddReplaceObject(GameObject start)
 		{
-			roomObjects[start.x-x][start.y-y] = start;			
+			roomObjects[start.x - x][start.y - y].Clear();
+			roomObjects[start.x-x][start.y-y].Add(start);			
 		}
+
+		private void AddObject(GameObject start)
+		{
+			roomObjects[start.x - x][start.y - y].Add(start);
+		}
+
 
 		private void FillWalls()
 		{
@@ -72,13 +87,13 @@ namespace RogueGame.Data
 					//jai pirmas ar paskutinis stulpelis, pildoma visa eilute, jei ne tik krastines
 					for (int j = 0; j < roomObjects[i].Length; j++)
 					{
-						roomObjects[i][j] = new WallBlock(x+i, y+j);
+						roomObjects[i][j].Add(new WallBlock(x+i, y+j));
 					}
 				}
 				else
 				{
-					roomObjects[i][0] = new WallBlock(x + i, y);
-					roomObjects[i][height-1] = new WallBlock(x + i, y + height-1);
+					roomObjects[i][0].Add(new WallBlock(x + i, y));
+					roomObjects[i][height-1].Add(new WallBlock(x + i, y + height-1));
 				}				
 			}
 
@@ -94,7 +109,26 @@ namespace RogueGame.Data
 			return new ArrayElementsStruct(x - this.x, y - this.y);
 		}
 
-		internal GameObject GetObject(int x, int y)
+		public ArrayElementsStruct ArrayElementsToXY(int x, int y)
+		{
+			return new ArrayElementsStruct(x + this.x, y + this.y);
+		}
+
+		internal GameObject GetFirstObject(int x, int y)
+		{
+			ArrayElementsStruct coord = XYToArrayElements(x, y);
+			if (roomObjects[coord.x][coord.y].Count > 0)
+			{
+				return roomObjects[coord.x][coord.y][0];
+			}
+			return null;
+		}
+		internal GameObject GetLastObject(int x, int y)
+		{
+			ArrayElementsStruct coord = XYToArrayElements(x, y);
+			return roomObjects[coord.x][coord.y][roomObjects[coord.x][coord.y].Count-1];
+		}
+		internal List<GameObject> GetObjects(int x, int y)
 		{
 			ArrayElementsStruct coord = XYToArrayElements(x, y);
 			return roomObjects[coord.x][coord.y];
@@ -102,14 +136,46 @@ namespace RogueGame.Data
 
 		internal void MoveObject(int oldX, int oldY, Hero hero)
 		{
-			AddReplaceObject(hero);
-			RemoveObject(oldX, oldY);
+			//AddReplaceObject(hero);
+			AddObject(hero);
+			RemoveObject(oldX, oldY, hero);
 		}
 
-		internal void RemoveObject(int oldX, int oldY)
+
+
+		internal void RemoveObject(int oldX, int oldY, GameObject gameObject)
 		{
 			ArrayElementsStruct coord = XYToArrayElements(oldX, oldY);
-			roomObjects[coord.x][coord.y] = null;
+			roomObjects[coord.x][coord.y].Remove(gameObject);
+		}
+		internal void RemoveObject(GameObject gameObject)
+		{
+			ArrayElementsStruct coord = XYToArrayElements(gameObject.x, gameObject.y);
+			roomObjects[coord.x][coord.y].Remove(gameObject);
+		}
+		internal int GetArea()
+		{
+			return width * height;
+		}
+
+		internal ArrayElementsStruct GetEmptyCenter()
+		{
+			int x = X + Width / 2;
+			int y = Y + Height / 2;
+
+			while (GetObjects(x, y).Count != 0)
+			{
+				x++;
+				if(GetObjects(x, y).Count != 0)
+				{
+					y++;
+				}
+			}
+			if (GetObjects(x, y).Count == 0)
+			{
+				return new ArrayElementsStruct(x, y);
+			}
+			return new ArrayElementsStruct(-1, -1);
 		}
 	}
 }

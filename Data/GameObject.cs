@@ -6,6 +6,8 @@ namespace RogueGame.Data
 {
 	abstract class GameObject
 	{
+		internal string Name { get; set; }
+		internal bool isColizionable { get; set; }
 		internal bool IsExplored { get; set; }
 		internal char renderChar;
 		internal int x;

@@ -19,8 +19,8 @@ namespace RogueGame.View.Windows
 			int titleboxWidth = 40;
 			List<string> title = new List<string>();
 			title.Add("Rogue game");
-			title.Add("Vardas pavardaitis kuryba");
-			title.Add("Made in Vilnius Coding school!");
+			title.Add("Aleksandr Sventickij kuryba");
+			title.Add("Made at home!");
 			titleTextBlock = new TextBlock(Console.WindowWidth / 2 - titleboxWidth / 2, 5, titleboxWidth, title);
 
 			int buttonWidth = 20;
