@@ -134,7 +134,7 @@ namespace RogueGame.Data
 			return roomObjects[coord.x][coord.y];
 		}
 
-		internal void MoveObject(int oldX, int oldY, Hero hero)
+		internal void MoveObject(int oldX, int oldY, GameObject hero)
 		{
 			//AddReplaceObject(hero);
 			AddObject(hero);
@@ -176,6 +176,21 @@ namespace RogueGame.Data
 				return new ArrayElementsStruct(x, y);
 			}
 			return new ArrayElementsStruct(-1, -1);
+		}
+
+		internal List<GameObject> GetEnemys()
+		{
+			List<GameObject> forReturn = new List<GameObject>();
+			foreach (var items in roomObjects)
+			{
+				foreach (var item in items)
+				{
+					List<GameObject> result = item.FindAll(gameObjects => gameObjects is Enemy);
+					forReturn.AddRange(result);
+				}
+			}
+
+			return forReturn;
 		}
 	}
 }

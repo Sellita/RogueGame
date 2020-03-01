@@ -64,18 +64,21 @@ namespace RogueGame.Data
 			}
 		}
 
-		public void Atack(ILivable livable)
+		public int Atack(ILivable livable)
 		{
-			livable.GetDamage(Damage);
+			return livable.GetDamage(Damage);
 		}
 
-		public void GetDamage(int atack)
+		public int GetDamage(int atack)
 		{
 			hp -= atack;
 			if (hp < 0)
 			{
 				hp = 0;
 			}
+			if (atack < 0) atack = 0;
+			return atack;
 		}
+
 	}
 }

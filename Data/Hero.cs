@@ -12,7 +12,7 @@ namespace RogueGame.Data
 		private int hp;
 		private int def;
 		private int damage;
-		private const int Basedamage = 4;
+		public const int Basedamage = 4;
 		private int speed;
 
 		Equipment helmet;
@@ -164,13 +164,14 @@ namespace RogueGame.Data
 			}
 		}
 
-		public void Atack(ILivable livable)
+		public int Atack(ILivable livable)
 		{
-			livable.GetDamage(damage);
+			return livable.GetDamage(damage);
 		}
 
-		public void GetDamage(int atack)
+		public int GetDamage(int atack)
 		{
+			
 			int dmg = atack - def;
 			if (dmg > 0)
 			{
@@ -179,7 +180,13 @@ namespace RogueGame.Data
 				{
 					hp = 0;
 				}
+				
 			}
+			else
+			{
+				dmg = 0;
+			}
+			return dmg;
 		}
 
 		public void Move(Directions direction)

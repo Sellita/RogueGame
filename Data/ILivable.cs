@@ -3,6 +3,6 @@
 	public interface ILivable
 	{
 		int Health { get; set; }
-		public void GetDamage(int atack);
+		public int GetDamage(int atack);
 	}
 }

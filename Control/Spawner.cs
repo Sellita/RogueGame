@@ -98,6 +98,11 @@ namespace RogueGame.Control
 			//Todo: add sql
 			//throw new NotImplementedException();
 			int rndEquipmentCount = rnd.Next(0, maxEquipmentCount);
+			if (rooms.GetArea() < 60)
+			{
+				rndEquipmentCount = rnd.Next(0, 1);
+			}
+			
 			for (int i = 0; i < rndEquipmentCount; i++)
 			{
 				int rndEquipment = rnd.Next(0, defaultEquipment.Count);

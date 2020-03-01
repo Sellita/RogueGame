@@ -10,12 +10,20 @@ namespace RogueGame.Control
 {
 	class GameControler
 	{
+		private const int heroStartAtack = Hero.Basedamage;
+		private const int heroStartDef = 0;
+		private const int heroStartHealth = 100;
+		private const int heroStartSpeed = 50;
 		private const int inventorySpace = 10;
-		
+
+		List<GameObject> enemysCanMove;
+
+
 		GameWindow gameWindow;
 
 		Hero hero;
 		GameObject objectUnderHero = null;
+		Enemy objectToAtack = null;
 		Level lvl;
 		const string txtRoadBlock = "=";
 		Room activeRoom;
@@ -312,6 +320,10 @@ namespace RogueGame.Control
 			string heroName = input.GetText();
 			//create hero
 			hero = new Hero(heroName, inventorySpace);
+			hero.Def = heroStartDef;
+			hero.Speed = heroStartSpeed;
+			hero.Health = heroStartHealth;
+			hero.Damage = heroStartAtack;
 			//positioning hero TODO:
 			//lvl.Rooms[0].IsActive = true;
 			//lvl.Rooms[0].RoomType = RoomType.Start;
@@ -359,7 +371,19 @@ namespace RogueGame.Control
 						OpenInventory();
 						break;
 				}
-				
+				if (objectToAtack != null)
+				{
+					HeroAtackEnemy(objectToAtack);
+				}
+				if (activeRoom != null && enemysCanMove != null)
+				{
+					if (enemysCanMove.Count > 0)
+					{
+						EnemysMoveAtack();
+					}
+				}
+
+				RenderHeroStats();
 			}
 			//game moves only when hero moves
 			
@@ -371,6 +395,94 @@ namespace RogueGame.Control
 			Console.ReadKey();
 			//room.isActive = true;
 			//gameWindow.RenderRoom(room);
+		}
+
+		private void EnemysMoveAtack()
+		{
+			
+			foreach (Enemy enemy in enemysCanMove)
+			{
+				int xDiff = enemy.x > hero.x ? enemy.x - hero.x : hero.x - enemy.x;
+				int yDiff = enemy.y > hero.y ? enemy.y - hero.y : hero.y - enemy.y;
+				if ((xDiff == 0 && yDiff == 1) || (xDiff == 1 && yDiff == 0))
+				{
+					//near make attack
+					int Atackrezult = enemy.Atack(hero);
+					gameWindow.WriteEvent($"{enemy.renderChar} deal you {Atackrezult} dmg");
+					RenderHeroStats();
+				}
+				else
+				{
+					if (xDiff > yDiff)
+					{
+						//moveByX
+						if (!MoveByX(enemy))
+						{
+							MoveByY(enemy);
+						}
+					}
+					else
+					{   //moveByY;
+						if (!MoveByY(enemy))
+						{
+							MoveByX(enemy);
+						}
+
+					}
+				}
+			}
+			gameWindow.RenderRoom(activeRoom);
+		}
+
+		private bool MoveByX(Enemy enemy)
+		{
+			if (hero.x > enemy.x)
+			{
+				return 	MoveEnemy(enemy, Directions.Right);
+			}
+			else
+			{
+				return MoveEnemy(enemy, Directions.Left);
+			}
+		}
+		private bool MoveByY(Enemy enemy)
+		{
+			if (hero.y > enemy.y)
+			{
+				return MoveEnemy(enemy, Directions.Down);
+			}
+			else
+			{
+				return MoveEnemy(enemy, Directions.Up);
+			}
+		}
+
+
+
+		//private void EnemysMoveToHero(List<game);
+
+		private void RenderHeroStats()
+		{
+			gameWindow.renderHero(hero);
+		}
+
+		private void HeroAtackEnemy(Enemy objectToAtack)
+		{
+			int dmg = hero.Atack(objectToAtack);
+			gameWindow.WriteEvent($"You Atack: {dmg}");
+			gameWindow.WriteEvent($"{objectToAtack.renderChar} health is {objectToAtack.Health}");
+			TryRemoveDeadEnemy(objectToAtack);
+			this.objectToAtack = null;
+		}
+
+		private void TryRemoveDeadEnemy(Enemy objectToAtack)
+		{
+			if(objectToAtack.Health <= 0)
+			{
+				activeRoom.RemoveObject(objectToAtack);
+				enemysCanMove.Remove(objectToAtack);
+				RenderRoom(activeRoom);
+			}
 		}
 
 		private void OpenInventory()
@@ -418,7 +530,7 @@ namespace RogueGame.Control
 				Equipment eq = objectUnderHero as Equipment;
 				if (hero.Inventory.IsInventoryFull())
 				{
-					gameWindow.SetErorHolder("Inventory full!");
+					gameWindow.WriteEvent("Inventory full!");
 				}
 				else
 				{
@@ -427,6 +539,41 @@ namespace RogueGame.Control
 					objectUnderHero = null;
 				}
 			}
+		}
+
+		private bool MoveEnemy(Enemy enemy, Directions directions)
+		{
+			GameObject objectInMovingPlacee = null;
+			switch (directions)
+			{
+				case Directions.Left:
+					objectInMovingPlacee = activeRoom.GetFirstObject(enemy.x - 1, enemy.y);
+					break;
+				case Directions.Right:
+					objectInMovingPlacee = activeRoom.GetFirstObject(enemy.x + 1, enemy.y);
+					break;
+				case Directions.Up:
+					objectInMovingPlacee = activeRoom.GetFirstObject(enemy.x, enemy.y - 1);
+					break;
+				case Directions.Down:
+					objectInMovingPlacee = activeRoom.GetFirstObject(enemy.x, enemy.y + 1);
+					break;
+				default:
+					break;
+			}
+			if (objectInMovingPlacee != null)
+			{
+				return false;
+
+			}
+			else
+			{
+				int oldX = enemy.x;
+				int oldY = enemy.y;
+				enemy.Move(directions);
+				activeRoom.MoveObject(oldX, oldY, enemy);
+			}
+			return true;
 		}
 
 		private void MoveObject(GameObject gameObject, Directions directions)
@@ -484,10 +631,13 @@ namespace RogueGame.Control
 						roadToMove.IsExplored = true;
 						ExploreRoad();
 						activeRoom.IsActive = false;
-						gameWindow.RenderRoom(activeRoom);
-						
-						
+						gameWindow.RenderRoom(activeRoom);					
 						activeRoom = null;						
+					}
+
+					if (objectInMovingPlacee is Enemy)
+					{
+						objectToAtack = objectInMovingPlacee as Enemy;
 					}
 
 				}
@@ -573,6 +723,7 @@ namespace RogueGame.Control
 						RoadBlock roadToMove = objectInMovingPlacee as RoadBlock;
 						hero.Move(directions);
 						activeRoom.AddReplaceObject(hero);
+						enemysCanMove = activeRoom.GetEnemys();
 						activeRoad.IsActive = false;
 						curentPosition.Value.RemoveObject(hero);							
 						gameWindow.RenderRoom(activeRoom);

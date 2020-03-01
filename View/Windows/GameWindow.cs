@@ -16,18 +16,25 @@ namespace RogueGame.View.Windows
 		TextLine keyInfoHolder1;
 		TextLine keyInfoHolder2;
 		TextLine keyInfoHolder3;
+		UpdatableTextBlock LastEvents;
 		public GameWindow() : base(0, 0, Console.WindowWidth, Console.WindowHeight, ' ')
 		{
 			gameField = new GameField(1, 1, 100, 27);
-			health = new AtributeTextLine(3, 28, 10, "20", "Health:");
-			defense = new AtributeTextLine(13, 28, 10, "0", "Defense:");
-			speed = new AtributeTextLine(23, 28, 10, "15", "Speed:");
-			atack = new AtributeTextLine(33, 28, 10, "3", "Atack:");
+			health = new AtributeTextLine(3, 28, 11, "20", "Health:");
+			defense = new AtributeTextLine(15, 28, 11, "0", "Defense:");
+			speed = new AtributeTextLine(27, 28, 11, "15", "Speed:");
+			atack = new AtributeTextLine(40, 28, 11, "3", "Atack:");
 			infoHolder = new TextLine(1, 0, 100, "", TextAligment.Left);
-			errorHolder = new TextLine(1, 102, 100, "", TextAligment.Left);
+			errorHolder = new TextLine(102, 1, 15, "", TextAligment.Left);
 			keyInfoHolder1 = new TextLine(102, 2, 15, "[I] inventory", TextAligment.Left);
 			keyInfoHolder2 = new TextLine(102, 3, 15, "[esc] Menu", TextAligment.Left);
 			keyInfoHolder3 = new TextLine(102, 4, 15, "", TextAligment.Left);
+			LastEvents = new UpdatableTextBlock(102, 21, 15, 5);
+		}
+		
+		public void WriteEvent(string data)
+		{
+			LastEvents.Write(data);
 		}
 
 		public void SetHealth(int hp)
@@ -77,6 +84,8 @@ namespace RogueGame.View.Windows
 			keyInfoHolder1.Render();
 			keyInfoHolder2.Render();
 			keyInfoHolder3.Render();
+
+			errorHolder.Render();
 		}
 
 		internal void RenderRoad(Road road)
@@ -98,6 +107,12 @@ namespace RogueGame.View.Windows
 			errorHolder.Data = textToWrite;
 		}
 
-	
+		internal void renderHero(Hero hero)
+		{
+			health.Data = hero.Health.ToString();
+			defense.Data = hero.Def.ToString();
+			speed.Data = hero.Speed.ToString();
+			atack.Data = hero.Damage.ToString();
+		}
 	}
 }

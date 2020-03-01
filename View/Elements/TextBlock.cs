@@ -16,8 +16,11 @@ namespace RogueGame.View.Elements
 			}
 		}
 
+		internal List<TextLine> TextBlocks { get => textBlocks; set => textBlocks = value; }
+
 		public override void Render()
 		{
+			ClearObjectSpace();
 			foreach(TextLine line in textBlocks)
 			{
 				line.Render();

@@ -69,6 +69,7 @@ namespace RogueGame.Control
 			inventory.Items[activeId] = hero.Equip(inventory.Items[activeId]);
 			inventoryWindow.RenderItem(activeId, GetText(inventory.Items[activeId]));
 			RenderHero();
+			WriteKeyInfo();
 		}
 
 		private void RenderHero()
