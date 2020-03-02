@@ -63,23 +63,27 @@ namespace RogueGame.Control
 			{
 				case 0://demagee
 					hero.Basedamage++;
+					StatsWindow.RenderItem(0, hero.Damage.ToString());
 					
 					break;
 				case 1://def
-					hero.Basedamage++;
+					hero.BaseDef++;
+					StatsWindow.RenderItem(1, hero.Def.ToString());
 					break;
 				case 2://speed
 					hero.Speed++;
+					StatsWindow.RenderItem(2, hero.Speed.ToString());
 					break;
 				case 3://health
 					hero.Health++;
+					StatsWindow.RenderItem(3, hero.Health.ToString());
 					break;
 				default:
 					break;
 			}
 			hero.Stats--;
 			RenderHero();
-			RenderHeroStats();
+			//RenderHeroStats();
 		}
 
 		private void RenderHero()
