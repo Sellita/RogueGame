@@ -8,7 +8,7 @@ namespace RogueGame.Data
 	class Hero : GameObject, IMovable, ILivable, IAtackable
 	{
 		public static readonly char HeroChar = '\u263A';
-		
+
 		private int hp;
 		private int def;
 		private int damage;
@@ -21,6 +21,11 @@ namespace RogueGame.Data
 		Equipment panties;
 		Equipment boots;
 		Equipment gun;
+
+		private int lvl = 1;
+		private int exp = 0;
+
+		public int Stats{ get; set; }
 
 		public int gold { get; set; } = 0;//toodo move in inventory
 
@@ -53,6 +58,18 @@ namespace RogueGame.Data
 		public int Basedamage { get => basedamage; set { basedamage = value; RecalculateStats(); }  }
 
 		public int BaseDef { get => baseDef; set { baseDef = value; RecalculateStats(); } }
+
+		public int Exp { get => exp; set { 
+				
+				exp = value;
+				if (exp > 10) { Lvl++; exp = 0; }
+			} }
+
+		public int Lvl { get => lvl; set { 
+				
+				lvl = value;
+				Stats++;
+			} }
 
 		public GameObject Equip(GameObject obj)
 		{

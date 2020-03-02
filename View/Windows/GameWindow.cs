@@ -19,6 +19,7 @@ namespace RogueGame.View.Windows
 		TextLine infoHolder;
 		TextLine errorHolder;
 		TextLine keyInfoHolder1;
+		TextLine keyInfoHolder4;
 		TextLine keyInfoHolder2;
 		TextLine keyInfoHolder3;
 		UpdatableTextBlock LastEvents;
@@ -35,8 +36,10 @@ namespace RogueGame.View.Windows
 			infoHolder = new TextLine(1, 0, 100, "", TextAligment.Left);
 			errorHolder = new TextLine(102, 1, 15, "", TextAligment.Left);
 			keyInfoHolder1 = new TextLine(102, 2, 15, "[I] inventory", TextAligment.Left);
-			keyInfoHolder2 = new TextLine(102, 3, 15, "[esc] Menu", TextAligment.Left);
-			keyInfoHolder3 = new TextLine(102, 4, 15, "", TextAligment.Left);
+			keyInfoHolder4 = new TextLine(102, 3, 15, "[C] Stats", TextAligment.Left);
+			keyInfoHolder2 = new TextLine(102, 4, 15, "[esc] Menu", TextAligment.Left);
+			keyInfoHolder3 = new TextLine(102, 5, 15, "", TextAligment.Left);
+			
 			LastEvents = new UpdatableTextBlock(102, 21, 15, 5);
 		}
 		
@@ -100,6 +103,7 @@ namespace RogueGame.View.Windows
 			keyInfoHolder1.Render();
 			keyInfoHolder2.Render();
 			keyInfoHolder3.Render();
+			keyInfoHolder4.Render();
 
 			errorHolder.Render();
 		}

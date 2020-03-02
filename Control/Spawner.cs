@@ -16,9 +16,9 @@ namespace RogueGame.Control
 
 		//Posible Default objects =)
 		List<Enemy> defaultEnemys = new List<Enemy>() {
-			new Enemy(0, 0, 'E', 10, 2),		
-			new Enemy(0, 0, 'S', 20, 4),		
-			new Enemy(0, 0, 'D', 15, 3)		
+			new Enemy(0, 0, 'E', 10, 2, 1),		
+			new Enemy(0, 0, 'S', 20, 4, 1),		
+			new Enemy(0, 0, 'D', 15, 3, 1)		
 		};
 
 		
@@ -87,6 +87,7 @@ namespace RogueGame.Control
 
 			//spawner when sql not working 
 			int rndEnemyCount = rnd.Next(0, maxEnemyCount);
+			int rndExpCount = rnd.Next(1, 10);
 			for (int i = 0; i < rndEnemyCount; i++)
 			{
 				int rndEnemyAtack = rnd.Next(EnemyMinAtack + (lvl*3), EnemyMaxAtack + 1 + (lvl * 3));
@@ -94,7 +95,7 @@ namespace RogueGame.Control
 				ArrayElementsStruct coord = GetRandomCoord(rooms);
 				if (coord.x != -1 && coord.y != -1)
 				{
-					rooms.AddReplaceObject(new Enemy(coord.x, coord.y, defaultEnemys[rndEnemy].renderChar, defaultEnemys[rndEnemy].Health, defaultEnemys[rndEnemy].Damage));
+					rooms.AddReplaceObject(new Enemy(coord.x, coord.y, defaultEnemys[rndEnemy].renderChar, defaultEnemys[rndEnemy].Health, defaultEnemys[rndEnemy].Damage, rndExpCount));
 				}
 			}
 			

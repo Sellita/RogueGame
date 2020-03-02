@@ -21,6 +21,17 @@ namespace RogueGame.Control
 
 		List<GameObject> enemysCanMove;
 
+		List<string> maps = new List<string>()
+		{
+			"Map.txt",
+			"Map_1.txt",
+			"Map_2.txt",
+			"Map_3.txt",
+			"Map_4.txt",
+			"Map_5.txt"
+
+		};
+
 
 		GameWindow gameWindow;
 
@@ -43,8 +54,8 @@ namespace RogueGame.Control
 
 			lvl = new Level();
 
-
-			GetLevelFromFile("Map.txt");//TODO: change to generation!!!!!!!!!!!
+			GetLeverFromRandomFile();
+			//TODO: change to generation!!!!!!!!!!!
 
 			//todo change every getlevelformfile
 
@@ -60,6 +71,13 @@ namespace RogueGame.Control
 			spawner = new Spawner();
 			spawner.SpawnAll(lvl.Rooms, lvl.Lvl);
 			//spawner.SpawnEnemy(lvl.Rooms);
+		}
+
+		private void GetLeverFromRandomFile()
+		{
+			int selectedMap = LvlGenerator.rnd.Next(0, maps.Count);
+
+			GetLevelFromFile(maps[selectedMap]);
 		}
 
 		private void AddRoadsToRooms()
@@ -951,6 +969,9 @@ namespace RogueGame.Control
 						break;
 					case ConsoleKey.U:
 						IteractWithObject();
+						break;				
+					case ConsoleKey.C:
+						OpenStats();
 						break;
 					case ConsoleKey.I:
 						OpenInventory();
@@ -1008,6 +1029,15 @@ namespace RogueGame.Control
 
 		}
 
+		private void OpenStats()
+		{
+			StatsControler statsControler = new StatsControler(hero);
+			statsControler.RunLoop();
+
+			gameWindow.Render();
+			RenderExploriedGameField();
+		}
+
 		private ActionsForMenu PauseMenu()
 		{
 			PauseMenuControler pauseControler = new PauseMenuControler();
@@ -1017,7 +1047,7 @@ namespace RogueGame.Control
 		private void RestartGame()
 		{
 			lvl = new Level();
-			GetLevelFromFile("Map.txt");//TODO: change to generation!!!!!!!!!!!
+			GetLeverFromRandomFile();//TODO: change to generation!!!!!!!!!!!
 			AddRoadsToRooms();
 			LvlGenerator.SetRoomsType(lvl.Rooms);
 			spawner = new Spawner();
@@ -1137,6 +1167,7 @@ namespace RogueGame.Control
 		{
 			if(objectToAtack.Health <= 0)
 			{
+				hero.Exp += objectToAtack.exp;
 				activeRoom.RemoveObject(objectToAtack);
 				enemysCanMove.Remove(objectToAtack);
 				RenderRoom(activeRoom);
@@ -1220,7 +1251,7 @@ namespace RogueGame.Control
 				int curentLvl = lvl.Lvl;
 				lvl = new Level();
 				lvl.Lvl+= curentLvl;
-				GetLevelFromFile("Map.txt");//TODO: change to generation!!!!!!!!!!!
+				GetLeverFromRandomFile();//TODO: change to generation!!!!!!!!!!!
 				AddRoadsToRooms();
 
 				LvlGenerator.SetRoomsType(lvl.Rooms);

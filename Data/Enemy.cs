@@ -12,6 +12,7 @@ namespace RogueGame.Data
 		public static readonly char EnemyDefaultChar = '\u03A8';
 		private int hp;
 		private int damage;
+		public int exp { get; set; }
 
 		public int Health { get => hp; set => hp = value; }
 		public int Damage { get => damage; set => damage = value; }
@@ -25,7 +26,7 @@ namespace RogueGame.Data
 			isColizionable = false;
 			renderChar = EnemyDefaultChar;
 		}
-		public Enemy(int x, int y, char renderChar, int hp, int atactk)
+		public Enemy(int x, int y, char renderChar, int hp, int atactk, int exp)
 		{
 			this.x = x;
 			this.y = y;
@@ -35,6 +36,7 @@ namespace RogueGame.Data
 			this.renderChar = renderChar;
 			this.hp = hp;
 			this.damage = atactk;
+			this.exp = exp;
 		}
 
 		public void SetnStartPosition(int x, int y)
