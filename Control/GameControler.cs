@@ -5,12 +5,15 @@ using RogueGame.View.Windows;
 using RogueGame.View.Elements;
 using RogueGame.Data;
 using System.IO;
+using RogueGame.Control.Menu;
 
 namespace RogueGame.Control
 {
 	class GameControler
 	{
-		private const int heroStartAtack = Hero.Basedamage;
+		private const int minRooms = 3;
+		private const int MaxRooms = 4;
+		private const int heroStartAtack = 3;
 		private const int heroStartDef = 0;
 		private const int heroStartHealth = 100;
 		private const int heroStartSpeed = 50;
@@ -39,8 +42,20 @@ namespace RogueGame.Control
 			gameWindow = new GameWindow();
 
 			lvl = new Level();
+
+
 			GetLevelFromFile("Map.txt");//TODO: change to generation!!!!!!!!!!!
-			AddRoadsToRooms();
+
+			//todo change every getlevelformfile
+
+			//todo changee
+
+			AddRoadsToRooms(); //UNCOMENT
+			gameWindow.Render();//todo remove
+
+			
+			
+
 			LvlGenerator.SetRoomsType(lvl.Rooms);
 			spawner = new Spawner();
 			spawner.SpawnAll(lvl.Rooms, lvl.Lvl);
@@ -61,6 +76,574 @@ namespace RogueGame.Control
 				finishRoom.AddReplaceObject(finish);
 
 			}			
+		}
+
+		private Road GenerateRoad(int startx, int starty, Directions direction)
+		{
+			int randomSteps = LvlGenerator.rnd.Next(3, 10);
+			if (direction == Directions.Down || direction == Directions.Up)
+			{
+				randomSteps = LvlGenerator.rnd.Next(3, 10);
+			}
+			else
+			{
+				randomSteps = LvlGenerator.rnd.Next(7, 30);
+			}
+			Road road = new Road();
+			for (int i = 0; i < randomSteps; i++)
+			{
+				switch (direction)
+				{
+					case Directions.Left:
+						road.AddBlock(new RoadBlock(startx - i, starty));
+						break;
+					case Directions.Right:
+						road.AddBlock(new RoadBlock(startx + i, starty));
+						break;
+					case Directions.Up:
+						road.AddBlock(new RoadBlock(startx, starty - i));
+						break;
+					case Directions.Down:
+						road.AddBlock(new RoadBlock(startx, starty + i));
+						break;
+					default:
+						break;
+				}
+				
+			}
+			return road;
+		}
+
+		private void RandomizeLevel()
+		{
+			int roomsCount = LvlGenerator.rnd.Next(minRooms, MaxRooms);
+			int stopCounter = roomsCount * 4;
+			int randomcoord = 0;
+			Room generatedRoom = LvlGenerator.GetRandomRoom();
+			lvl.AddRoom(generatedRoom);
+			gameWindow.RenderRoom(generatedRoom);
+			roomsCount--;
+			Directions direction = Directions.Left;
+			if (generatedRoom.X < 20)
+			{
+				direction = Directions.Left;
+			}
+			else if(generatedRoom.X>60)
+			{
+				direction = Directions.Right;
+			}
+		
+			while (roomsCount > 1 && stopCounter > 0)
+			{
+
+				int directionInt = LvlGenerator.rnd.Next(0, Enum.GetNames(typeof(Directions)).Length);
+
+				
+				direction = (Directions)directionInt;
+
+				switch (direction)
+				{
+					case Directions.Left:
+						
+						if (generatedRoom == null)
+						{
+							RoadBlock tmpblock = lvl.Roads[lvl.Roads.Count -1 ].RoadBlocks.Last.Value;
+							Road tmpRoad = GenerateRoad(tmpblock.x, tmpblock.y, Directions.Left);
+							foreach (var item in tmpRoad.RoadBlocks)
+							{
+								lvl.Roads[lvl.Roads.Count-1].AddBlock(new RoadBlock(item.x, item.y));
+							}
+						}
+						else
+						{
+							randomcoord = LvlGenerator.rnd.Next(generatedRoom.Y + 1, generatedRoom.Y + generatedRoom.Height - 1);
+							lvl.AddRoad(GenerateRoad(generatedRoom.X, randomcoord, Directions.Left));
+						}
+						break;
+					case Directions.Right:
+						
+						if (generatedRoom == null)
+						{
+							RoadBlock tmpblock = lvl.Roads[lvl.Roads.Count-1].RoadBlocks.Last.Value;
+							Road tmpRoad = GenerateRoad(tmpblock.x, tmpblock.y, Directions.Left);
+							foreach (var item in tmpRoad.RoadBlocks)
+							{
+								lvl.Roads[lvl.Roads.Count-1].AddBlock(new RoadBlock(item.x, item.y));
+							}
+						}
+						else
+						{
+							randomcoord = LvlGenerator.rnd.Next(generatedRoom.Y + 1, generatedRoom.Y + generatedRoom.Height - 1);
+							lvl.AddRoad(GenerateRoad(generatedRoom.X + generatedRoom.Width - 1, randomcoord, Directions.Right));
+						}
+						break;
+					case Directions.Up:
+						if (generatedRoom == null)
+						{
+							RoadBlock tmpblock = lvl.Roads[lvl.Roads.Count-1].RoadBlocks.Last.Value;
+							Road tmpRoad = GenerateRoad(tmpblock.x, tmpblock.y, Directions.Left);
+							foreach (var item in tmpRoad.RoadBlocks)
+							{
+								lvl.Roads[lvl.Roads.Count-1].AddBlock(new RoadBlock(item.x, item.y));
+							}
+						}
+						else
+						{
+							randomcoord = LvlGenerator.rnd.Next(generatedRoom.X + 1, generatedRoom.X + generatedRoom.Width - 1);
+							
+								lvl.AddRoad(GenerateRoad(randomcoord, generatedRoom.Y, Directions.Up));
+						}
+						break;
+					case Directions.Down:
+						
+						if (generatedRoom == null)
+						{
+							RoadBlock tmpblock = lvl.Roads[lvl.Roads.Count-1].RoadBlocks.Last.Value;
+							Road tmpRoad = GenerateRoad(tmpblock.x, tmpblock.y, Directions.Left);
+							foreach (var item in tmpRoad.RoadBlocks)
+							{
+								lvl.Roads[lvl.Roads.Count-1].AddBlock(new RoadBlock(item.x, item.y));
+							}
+						}
+						else
+						{
+							randomcoord = LvlGenerator.rnd.Next(generatedRoom.X + 1, generatedRoom.X + generatedRoom.Width - 1);
+							lvl.AddRoad(GenerateRoad(randomcoord, generatedRoom.Y + generatedRoom.Height, Directions.Down));
+						}
+						break;
+					default:
+						break;
+				}
+				RoadBlock rb = lvl.Roads[lvl.Roads.Count - 1].RoadBlocks.Last.Value;
+				generatedRoom = LvlGenerator.GetHalfRandomRoom(direction, rb.x, rb.y);
+				if (generatedRoom != null)
+				{
+					lvl.AddRoom(generatedRoom);
+					roomsCount--;
+				}
+				else
+				{
+					generatedRoom = null;
+					
+					
+				}
+				
+				stopCounter--;
+				if (generatedRoom != null)
+				{
+					gameWindow.RenderRoom(generatedRoom);
+				}
+				foreach (var item in lvl.Roads)
+				{
+					gameWindow.RenderRoad(item);
+				}
+
+			}
+				/*
+				int roomsCount = LvlGenerator.rnd.Next(minRooms, MaxRooms);
+				int stopCounter = roomsCount * 4;
+				//generate rooms
+				while (roomsCount > 0 && stopCounter > 0)
+				{
+					Room generatedRoom = LvlGenerator.GetRandomRoom();
+					//Check rooms colision
+					//checl road colision
+					bool isContactRooms = false;
+					bool isContactRoads = false;
+
+					if (lvl.Roads.Count > 0)
+					{
+
+						isContactRoads = CheckRoadColision(generatedRoom);
+					}
+					if(lvl.Rooms.Count > 0)
+					{
+						isContactRooms = CheckRoomColision(generatedRoom);
+					}
+
+					if(!isContactRoads && !isContactRooms)
+					{
+						//addRoomToLvl
+						lvl.AddRoom(generatedRoom);
+						gameWindow.RenderRoom(generatedRoom);//TODO remove
+						roomsCount--;
+						if (lvl.Rooms.Count > 1)
+						{
+							Road road = CreateRoad(generatedRoom, lvl.Rooms[lvl.Rooms.Count - 2]);
+							lvl.AddRoad(road);
+							//gameWindow.RenderRoad(road);
+						}
+
+					}
+					stopCounter--;
+
+				}
+				*/
+			}
+
+		private Road CreateRoad(Room generatedRoom, Room room)
+		{
+			int firstRoomX1 = generatedRoom.X;
+			int firstRoomX2 = generatedRoom.X + generatedRoom.Width;
+			int firstRoomY1 = generatedRoom.Y;
+			int firstRoomY2 = generatedRoom.Y + generatedRoom.Height;
+			int secondRoomX1 = room.X;
+			int secondRoomX2 = room.X + room.Width;
+			int secondRoomY1 = room.Y;
+			int secondRoomY2 = room.Y + room.Height;
+			//check easies zones up down left right
+			RoadDirections direction = GetPosibleDirection(generatedRoom, room);
+			int directionForCorner = LvlGenerator.rnd.Next(0, 2);
+			Road road = new Road();
+			int randomOutPos = 0;
+			int randomInPos = 0;
+			int lastx = 0;
+			int lasty = 0;
+			int posibleLine = 0;
+			switch (direction)
+			{
+				case RoadDirections.upLeft:
+					
+					if (directionForCorner == 0)
+					{
+						//first up
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomX1 + 1, firstRoomX2);
+						randomInPos = LvlGenerator.rnd.Next(secondRoomY1 + 1, secondRoomY2);
+						
+						road.AddBlock(new RoadBlock(randomOutPos ,firstRoomY1));
+						lastx = randomOutPos;
+						lasty = firstRoomY1 - 1;
+						while (lasty != randomInPos)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lasty--;
+						}
+						while(lastx != secondRoomX2)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lastx--;
+						}
+						road.AddBlock(new RoadBlock(lastx, lasty));
+					}
+					else
+					{
+						//first left
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomY1 + 1, firstRoomY2);
+						randomInPos = LvlGenerator.rnd.Next(secondRoomX1 + 1, secondRoomX2);
+						
+						road.AddBlock(new RoadBlock(firstRoomX1 ,randomOutPos));
+						lastx = firstRoomX1 - 1;
+						lasty = randomOutPos;
+						while (lastx != randomInPos)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lastx--;
+						}
+						while (lasty != secondRoomY2)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lasty--;
+						}
+						road.AddBlock(new RoadBlock(lastx, lasty));
+					}
+
+					break;
+				case RoadDirections.upMidle:
+					posibleLine = 0;
+					
+					if (firstRoomX1 < secondRoomX2)
+					{
+						posibleLine = secondRoomX2 - firstRoomX1;
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomX1 + 1, firstRoomX1 + posibleLine);
+					}
+					else
+					{
+						posibleLine = firstRoomX1 - secondRoomX2;
+						randomOutPos = LvlGenerator.rnd.Next(secondRoomX2 + 1, secondRoomX2 + posibleLine);
+					}
+					lasty = firstRoomY1;
+					while (lasty != secondRoomY2)
+					{
+						road.AddBlock(new RoadBlock(randomOutPos, lasty));
+						lasty--;
+					}				
+					
+					break;
+				case RoadDirections.upRight:
+					if (directionForCorner == 0)
+					{
+						//first up
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomX1 + 1, firstRoomX2);
+						randomInPos = LvlGenerator.rnd.Next(secondRoomY1 + 1, secondRoomY2);
+
+						road.AddBlock(new RoadBlock(randomOutPos, firstRoomY1));
+						lastx = randomOutPos;
+						lasty = firstRoomY1 - 1;
+						while (lasty != randomInPos)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lasty--;
+						}
+						while (lastx != secondRoomX1)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lastx++;
+						}
+						road.AddBlock(new RoadBlock(lastx, lasty));
+					}
+					else
+					{
+						//first left
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomY1 + 1, firstRoomY2);
+						randomInPos = LvlGenerator.rnd.Next(secondRoomX1 + 1, secondRoomX2);
+
+						road.AddBlock(new RoadBlock(firstRoomX1, randomOutPos));
+						lastx = firstRoomX1 + 1;
+						lasty = randomOutPos;
+						while (lastx != randomInPos)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lastx++;
+						}
+						while (lasty != secondRoomY2)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lasty--;
+						}
+						road.AddBlock(new RoadBlock(lastx, lasty));
+					}
+					break;
+				case RoadDirections.MidleLeft:
+					posibleLine = 0;
+					while(!isInArea(firstRoomY1, firstRoomY2, randomOutPos) || !isInArea(secondRoomY1, secondRoomY2, randomOutPos))
+					{
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomY1+1, firstRoomY2);
+					}				
+
+					lastx = firstRoomX1;
+					while (lastx != secondRoomX2)
+					{
+						road.AddBlock(new RoadBlock(lastx, randomOutPos));
+						lastx--;
+					}
+					road.AddBlock(new RoadBlock(lastx, randomOutPos));
+
+					break;
+				case RoadDirections.MidleRight:
+					posibleLine = 0;
+					while (!isInArea(firstRoomY1, firstRoomY2, randomOutPos) || !isInArea(secondRoomY1, secondRoomY2, randomOutPos))
+					{
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomY1 + 1, firstRoomY2);
+					}
+
+					lastx = firstRoomX2;
+					while (lastx != secondRoomX1)
+					{
+						road.AddBlock(new RoadBlock(lastx, randomOutPos));
+						lastx++;
+					}
+					road.AddBlock(new RoadBlock(lastx, randomOutPos));
+					break;
+				case RoadDirections.DownLeft:
+					if (directionForCorner == 0)
+					{
+						//first up
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomX1 + 1, firstRoomX2);
+						randomInPos = LvlGenerator.rnd.Next(secondRoomY1 + 1, secondRoomY2);
+
+						road.AddBlock(new RoadBlock(randomOutPos, firstRoomY2));
+						lastx = randomOutPos;
+						lasty = firstRoomY2 + 1;
+						while (lasty != randomInPos)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lasty++;
+						}
+						while (lastx != secondRoomX2)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lastx--;
+						}
+						road.AddBlock(new RoadBlock(lastx, lasty));
+					}
+					else
+					{
+						//first left
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomY1 + 1, firstRoomY2);
+						randomInPos = LvlGenerator.rnd.Next(secondRoomX1 + 1, secondRoomX2);
+
+						road.AddBlock(new RoadBlock(firstRoomX1, randomOutPos));
+						lastx = firstRoomX1 - 1;
+						lasty = randomOutPos;
+						while (lastx != randomInPos)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lastx--;
+						}
+						while (lasty != secondRoomY1)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lasty++;
+						}
+						road.AddBlock(new RoadBlock(lastx, lasty));
+					}
+
+					break;
+				case RoadDirections.DownMidle:
+					posibleLine = 0;
+
+					if (firstRoomX1 < secondRoomX2)
+					{
+						posibleLine = secondRoomX2 - firstRoomX1;
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomX1 + 1, firstRoomX1 + posibleLine);
+					}
+					else
+					{
+						posibleLine = firstRoomX1 - secondRoomX2;
+						randomOutPos = LvlGenerator.rnd.Next(secondRoomX2 + 1, secondRoomX2 + posibleLine);
+					}
+					lasty = firstRoomY1;
+					while (lasty != secondRoomY1)
+					{
+						road.AddBlock(new RoadBlock(randomOutPos, lasty));
+						lasty++;
+					}
+					break;
+				case RoadDirections.DownRight:
+					if (directionForCorner == 0)
+					{
+						//first down
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomX1 + 1, firstRoomX2);
+						randomInPos = LvlGenerator.rnd.Next(secondRoomY1 + 1, secondRoomY2);
+
+						road.AddBlock(new RoadBlock(randomOutPos, firstRoomY2));
+						lastx = randomOutPos;
+						lasty = firstRoomY2 + 1;
+						while (lasty != randomInPos)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lasty++;
+						}
+						while (lastx != secondRoomX1)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lastx++;
+						}
+						road.AddBlock(new RoadBlock(lastx, lasty));
+					}
+					else
+					{
+						//first left
+						randomOutPos = LvlGenerator.rnd.Next(firstRoomY1 + 1, firstRoomY2);
+						randomInPos = LvlGenerator.rnd.Next(secondRoomX1 + 1, secondRoomX2);
+
+						road.AddBlock(new RoadBlock(firstRoomX1, randomOutPos));
+						lastx = firstRoomX1 + 1;
+						lasty = randomOutPos;
+						while (lastx != randomInPos)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lastx++;
+						}
+						while (lasty != secondRoomY1)
+						{
+							road.AddBlock(new RoadBlock(lastx, lasty));
+							lasty++;
+						}
+						road.AddBlock(new RoadBlock(lastx, lasty));
+					}
+					break;
+					
+				default:
+					break;
+			}
+			return road;
+		}
+
+		private bool isInArea(int x, int y, int check)
+		{
+			return (x < check && y > check); 
+		}
+
+		private RoadDirections GetPosibleDirection(Room generatedRoom, Room room)
+		{
+			int firstRoomX1 = generatedRoom.X;
+			int firstRoomX2 = generatedRoom.X+generatedRoom.Width;
+			int firstRoomY1 = generatedRoom.Y;
+			int firstRoomY2 = generatedRoom.Y + generatedRoom.Height;
+			int secondRoomX1 = room.X;
+			int secondRoomX2 = room.X + room.Width;
+			int secondRoomY1 = room.Y;
+			int secondRoomY2 = room.Y + room.Height;
+
+			if(firstRoomX1 >= secondRoomX2 && firstRoomY1 >= secondRoomY2)
+			{
+				return RoadDirections.upLeft;
+			}
+			if ((firstRoomX1 < secondRoomX2 && firstRoomY1 >= secondRoomY2 && secondRoomX1<firstRoomX2-2) || (firstRoomX2 > secondRoomX1 && firstRoomY1 >= secondRoomY2))
+				{
+				return RoadDirections.upMidle;
+			}
+			if (firstRoomX2 < secondRoomX1 && firstRoomY1 >= secondRoomY2)
+			{
+				return RoadDirections.upRight;
+			}
+
+			if ((firstRoomX1 > secondRoomX2 && firstRoomY1 + 2 > secondRoomY2) || (firstRoomX1 > secondRoomX2 && firstRoomY2-2 > secondRoomY1))
+			{
+				return RoadDirections.MidleLeft;
+			}
+			if ((firstRoomX2 < secondRoomX1 && firstRoomY1 + 2 > secondRoomY2) || (firstRoomX2 < secondRoomX1 && firstRoomY2+2 > secondRoomY1))
+			{
+				return RoadDirections.MidleRight;
+			}
+
+			if (firstRoomX1 >= secondRoomX2 && firstRoomY2 < secondRoomY2)
+			{
+				return RoadDirections.DownLeft;
+			}
+			if ((firstRoomX1 < secondRoomX2 && firstRoomY2 < secondRoomY1) || (firstRoomX2 > secondRoomX1 && firstRoomY2 < secondRoomY1))
+			{
+				return RoadDirections.DownMidle;
+			}
+			if (firstRoomX2 <= secondRoomX1 && firstRoomY2 < secondRoomY1)
+			{
+				return RoadDirections.DownRight;
+			}
+			return RoadDirections.unspecified;
+
+		}
+
+		private bool CheckRoadColision(Room generatedRoom)
+		{
+			foreach (Road road in lvl.Roads)
+			{
+				foreach (RoadBlock block in road.RoadBlocks)
+				{
+					if (generatedRoom.X < block.x && generatedRoom.X + generatedRoom.Width > block.x && generatedRoom.Y < block.y && generatedRoom.Y + generatedRoom.Height > block.y)
+					{
+						return true;
+					}
+					
+				}
+			
+			}
+			return false;
+		}
+
+		private bool CheckRoomColision(Room generatedRoom)
+		{
+			for (int i = generatedRoom.X-1; i < generatedRoom.X + generatedRoom.Width+1; i++)
+			{
+				for (int j = generatedRoom.Y-1; j < generatedRoom.Y + generatedRoom.Height+1; j++)
+				{
+					if (lvl.GetRommWithCoord(i, j) != null)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		private void GetLevelFromFile(string file)//only for first tests
@@ -339,6 +922,7 @@ namespace RogueGame.Control
 			activeRoom.AddReplaceObject(hero);
 
 			gameWindow.RenderRoom(activeRoom);
+			gameWindow.SetDungeonLvl(lvl.Lvl);
 			//gameWindow.DrawInGameField(hero);
 			GameLoop();
 		}
@@ -348,6 +932,7 @@ namespace RogueGame.Control
 
 			while (isGameStarted)
 			{
+				
 				ConsoleKeyInfo pressedChar = Console.ReadKey(true);
 				ClearTmpHolders();
 				switch (pressedChar.Key)
@@ -369,7 +954,27 @@ namespace RogueGame.Control
 						break;
 					case ConsoleKey.I:
 						OpenInventory();
-						break;
+						continue;
+						//break;
+					case ConsoleKey.Escape:
+						ActionsForMenu actionAfterPause = PauseMenu();
+						switch (actionAfterPause)
+						{
+							case ActionsForMenu.MainMenu:
+								isGameStarted = false;
+								continue;
+								break;
+							case ActionsForMenu.Quit:
+								Environment.Exit(0);
+								break;
+
+							default:
+								gameWindow.Render();
+								RenderExploriedGameField();
+								break;
+						}
+						continue;
+						//break;
 				}
 				if (objectToAtack != null)
 				{
@@ -384,17 +989,70 @@ namespace RogueGame.Control
 				}
 
 				RenderHeroStats();
+				if(hero.Health <= 0)
+				{
+					ActionsForMenu action = GameOver();
+					switch (action)
+					{
+						case ActionsForMenu.Restart:
+							RestartGame();
+							break;
+						default:
+							isGameStarted = false;
+							break;
+					}
+
+					
+				}
 			}
-			//game moves only when hero moves
+
+		}
+
+		private ActionsForMenu PauseMenu()
+		{
+			PauseMenuControler pauseControler = new PauseMenuControler();
+			return pauseControler.ShowMenu();
+		}
+
+		private void RestartGame()
+		{
+			lvl = new Level();
+			GetLevelFromFile("Map.txt");//TODO: change to generation!!!!!!!!!!!
+			AddRoadsToRooms();
+			LvlGenerator.SetRoomsType(lvl.Rooms);
+			spawner = new Spawner();
+			spawner.SpawnAll(lvl.Rooms, lvl.Lvl);
+			hero = new Hero(hero.Name, inventorySpace);
+			hero.Def = heroStartDef;
+			hero.Speed = heroStartSpeed;
+			hero.Health = heroStartHealth;
+			hero.Damage = heroStartAtack;
+
+			activeRoom = lvl.GetStartRoom();
+			ArrayElementsStruct coord = activeRoom.GetEmptyCenter();
+			activeRoom.IsActive = true;
+			hero.SetStartPosition(coord.x, coord.y);
+			gameWindow.Render();
+
+
+			activeRoom.AddReplaceObject(hero);
+
+			gameWindow.RenderRoom(activeRoom);
+			gameWindow.SetDungeonLvl(lvl.Lvl);
+			////
+			///		
+			GameObject objectUnderHero = null;
+			Enemy objectToAtack = null;
+			enemysCanMove.Clear();
+			RenderHeroStats();
+		}
+
+		private ActionsForMenu GameOver()
+		{
+			GameOverControler gameOverControler = new GameOverControler(lvl.Lvl);
+			return gameOverControler.ShowMenu();
+
 			
-			
-			
-			//Room room = new Room(2, 2, 20, 6);
-			//room.isActive = false;
-			//gameWindow.RenderRoom(room);
-			Console.ReadKey();
-			//room.isActive = true;
-			//gameWindow.RenderRoom(room);
 		}
 
 		private void EnemysMoveAtack()
@@ -525,7 +1183,7 @@ namespace RogueGame.Control
 
 		private void IteractWithObject()
 		{
-			if(objectUnderHero is Equipment)
+			if (objectUnderHero is Equipment)
 			{
 				Equipment eq = objectUnderHero as Equipment;
 				if (hero.Inventory.IsInventoryFull())
@@ -538,6 +1196,73 @@ namespace RogueGame.Control
 					activeRoom.RemoveObject(objectUnderHero);
 					objectUnderHero = null;
 				}
+			}
+			if (objectUnderHero is Gold)
+			{
+				Gold gold = objectUnderHero as Gold;
+				hero.gold += gold.Value;
+				activeRoom.RemoveObject(objectUnderHero);
+				objectUnderHero = null;
+
+			}
+			if (objectUnderHero is Potion)
+			{
+				Potion potion = objectUnderHero as Potion;
+				DrinkPotion(potion);
+				
+				activeRoom.RemoveObject(objectUnderHero);
+				objectUnderHero = null;
+			}
+			if (objectUnderHero is Door)
+			{
+
+
+				int curentLvl = lvl.Lvl;
+				lvl = new Level();
+				lvl.Lvl+= curentLvl;
+				GetLevelFromFile("Map.txt");//TODO: change to generation!!!!!!!!!!!
+				AddRoadsToRooms();
+
+				LvlGenerator.SetRoomsType(lvl.Rooms);
+				spawner = new Spawner();
+				spawner.SpawnAll(lvl.Rooms, lvl.Lvl);
+
+				activeRoom = lvl.GetStartRoom();
+				ArrayElementsStruct coord = activeRoom.GetEmptyCenter();
+				activeRoom.IsActive = true;
+				hero.SetStartPosition(coord.x, coord.y);
+				gameWindow.Render();
+
+
+				activeRoom.AddReplaceObject(hero);
+
+				gameWindow.RenderRoom(activeRoom);
+				objectUnderHero = null;
+				gameWindow.SetDungeonLvl(lvl.Lvl);
+
+			}
+
+		}
+
+		private void DrinkPotion(Potion potion)
+		{
+			switch (potion.PotionType)
+			{
+				case PotionType.Health:
+					hero.Health += potion.Value;
+					break;
+				case PotionType.Speed:
+					hero.Speed += potion.Value;
+					break;
+				case PotionType.Defense:
+					hero.BaseDef += potion.Value;
+					break;
+				case PotionType.Atack:
+					hero.Basedamage += potion.Value;
+					
+					break;
+				default:
+					break;
 			}
 		}
 
@@ -606,6 +1331,7 @@ namespace RogueGame.Control
 					//TODO: susidurimo apdirbimas
 					if (objectInMovingPlacee.isColizionable)
 					{
+
 						//zengem ant objekto
 						hero.Move(directions);
 						activeRoom.MoveObject(oldX, oldY, hero);
@@ -639,6 +1365,7 @@ namespace RogueGame.Control
 					{
 						objectToAtack = objectInMovingPlacee as Enemy;
 					}
+
 
 				}
 				else
@@ -743,10 +1470,11 @@ namespace RogueGame.Control
 
 		private void WriteObjectInfoInHolders(GameObject gameObject)
 		{
-			string textToWrite = $"You found {gameObject.Name} with:";
+			string textToWrite = $"You found";
 
 			if(gameObject is Equipment)
 			{
+				textToWrite += $" {gameObject.Name} with:";
 				Equipment eq = gameObject as Equipment;
 				if (eq.Damage > 0)
 				{
@@ -758,7 +1486,41 @@ namespace RogueGame.Control
 				}
 				gameWindow.SetkeyInfoHolder3("[U] to Pick up");
 			}
-			
+			if (gameObject is Gold)
+			{
+				Gold gold = gameObject as Gold;
+				textToWrite += $" {gold.Value}$";
+				gameWindow.SetkeyInfoHolder3("[U] to Pick up");
+			}
+			if (gameObject is Potion)
+			{
+				Potion potion = gameObject as Potion;
+				textToWrite += $" {potion.PotionType.ToString()} potion with: {potion.Value}";
+				switch (potion.PotionType)
+				{
+					case PotionType.Health:
+						textToWrite += $" HP";
+						break;
+					case PotionType.Speed:
+						textToWrite += $" Speed";
+						break;
+					case PotionType.Defense:
+						textToWrite += $" Defense";
+						break;
+					case PotionType.Atack:
+						textToWrite += $" Atack";
+						break;
+					default:
+						break;
+				}
+				gameWindow.SetkeyInfoHolder3("[U] to Drink");
+			}
+			if (gameObject is Door)
+			{
+				textToWrite += $" Next LVL portal";
+				gameWindow.SetkeyInfoHolder3("[U] Move next LVL");
+			}
+
 			gameWindow.SetInfoHolder(textToWrite);
 		}
 

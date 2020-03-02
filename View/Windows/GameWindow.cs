@@ -11,6 +11,11 @@ namespace RogueGame.View.Windows
 		AtributeTextLine defense;
 		AtributeTextLine speed;
 		AtributeTextLine atack;
+		AtributeTextLine gold;
+
+		AtributeTextLine dungLvl;
+
+
 		TextLine infoHolder;
 		TextLine errorHolder;
 		TextLine keyInfoHolder1;
@@ -24,6 +29,9 @@ namespace RogueGame.View.Windows
 			defense = new AtributeTextLine(15, 28, 11, "0", "Defense:");
 			speed = new AtributeTextLine(27, 28, 11, "15", "Speed:");
 			atack = new AtributeTextLine(40, 28, 11, "3", "Atack:");
+			gold = new AtributeTextLine(53, 28, 11, "0", "Gold:");
+			dungLvl = new AtributeTextLine(102, 28, 15, "0", "DungeonLvl: ");
+
 			infoHolder = new TextLine(1, 0, 100, "", TextAligment.Left);
 			errorHolder = new TextLine(102, 1, 15, "", TextAligment.Left);
 			keyInfoHolder1 = new TextLine(102, 2, 15, "[I] inventory", TextAligment.Left);
@@ -53,14 +61,19 @@ namespace RogueGame.View.Windows
 		{
 			this.atack.Data = atack.ToString();
 		}
+		public void SetGold(int gold)
+		{
+			this.gold.Data = gold.ToString();
+		}
+		public void SetDungeonLvl(int lvl)
+		{
+			this.dungLvl.Data = lvl.ToString();
+		}
 
 		public void RenderRoom(Room room)
 		{
 
 			gameField.RenderRoom(room);
-
-
-
 		}
 
 		public void DrawInGameField(int x, int y, char c)
@@ -80,6 +93,9 @@ namespace RogueGame.View.Windows
 			defense.Render();
 			speed.Render();
 			atack.Render();
+			gold.Render();
+			dungLvl.Render();
+
 			infoHolder.Render();
 			keyInfoHolder1.Render();
 			keyInfoHolder2.Render();
@@ -113,6 +129,7 @@ namespace RogueGame.View.Windows
 			defense.Data = hero.Def.ToString();
 			speed.Data = hero.Speed.ToString();
 			atack.Data = hero.Damage.ToString();
+			gold.Data = hero.gold.ToString();
 		}
 	}
 }

@@ -21,6 +21,8 @@ namespace RogueGame.Control
 			new Enemy(0, 0, 'D', 15, 3)		
 		};
 
+		
+
 		List<Equipment> defaultEquipment = new List<Equipment>()
 		{
 			new Equipment(0, 0, EquipmentType.Armor, 0, 1, 'A', "Armor"),
@@ -29,6 +31,12 @@ namespace RogueGame.Control
 			new Equipment(0, 0, EquipmentType.Helmet, 0, 1, 'H', "Helmet"),
 			new Equipment(0, 0, EquipmentType.Panties, 0, 1, 'P', "Panties")
 		};
+		private int lvl;
+		private const int MaxGoldValue = 100;
+		private const int minPotionValue = 5;
+		private const int MaxPotionValue = 15;
+		private const int EnemyMinAtack = 1;
+		private const int EnemyMaxAtack = 7;
 
 		public Spawner()
 		{
@@ -37,6 +45,7 @@ namespace RogueGame.Control
 
 		public void SpawnAll(List<Room> rooms, int lvl)
 		{
+			this.lvl = lvl;
 			foreach (Room room in rooms)
 			{
 				switch (room.RoomType)
@@ -80,9 +89,13 @@ namespace RogueGame.Control
 			int rndEnemyCount = rnd.Next(0, maxEnemyCount);
 			for (int i = 0; i < rndEnemyCount; i++)
 			{
+				int rndEnemyAtack = rnd.Next(EnemyMinAtack + (lvl*3), EnemyMaxAtack + 1 + (lvl * 3));
 				int rndEnemy = rnd.Next(0, defaultEnemys.Count);
 				ArrayElementsStruct coord = GetRandomCoord(rooms);
-				rooms.AddReplaceObject(new Enemy(coord.x, coord.y, defaultEnemys[rndEnemy].renderChar, defaultEnemys[rndEnemy].Health, defaultEnemys[rndEnemy].Damage));
+				if (coord.x != -1 && coord.y != -1)
+				{
+					rooms.AddReplaceObject(new Enemy(coord.x, coord.y, defaultEnemys[rndEnemy].renderChar, defaultEnemys[rndEnemy].Health, defaultEnemys[rndEnemy].Damage));
+				}
 			}
 			
 
@@ -92,6 +105,21 @@ namespace RogueGame.Control
 		{
 			//Todo: add sql
 			//throw new NotImplementedException();
+			int rndCount = rnd.Next(0, maxGoldCount);
+			if (rooms.GetArea() < 60)
+			{
+				rndCount = rnd.Next(0, 1);
+			}
+
+			for (int i = 0; i < rndCount; i++)
+			{
+				int rndGoldValue = rnd.Next(0, MaxGoldValue);
+				ArrayElementsStruct coord = GetRandomCoord(rooms);
+				if (coord.x != -1 && coord.y != -1)
+				{
+					rooms.AddReplaceObject(new Gold(coord.x, coord.y, rndGoldValue));
+				}
+			}
 		}
 		internal void SpawnEquipment(Room rooms)
 		{
@@ -102,12 +130,15 @@ namespace RogueGame.Control
 			{
 				rndEquipmentCount = rnd.Next(0, 1);
 			}
-			
+
 			for (int i = 0; i < rndEquipmentCount; i++)
 			{
 				int rndEquipment = rnd.Next(0, defaultEquipment.Count);
 				ArrayElementsStruct coord = GetRandomCoord(rooms);
-				rooms.AddReplaceObject(new Equipment(coord.x, coord.y, defaultEquipment[rndEquipment].Equipmenttype, defaultEquipment[rndEquipment].Damage, defaultEquipment[rndEquipment].Defense, defaultEquipment[rndEquipment].renderChar, defaultEquipment[rndEquipment].Name));
+				if (coord.x != -1 && coord.y != -1)
+				{
+					rooms.AddReplaceObject(new Equipment(coord.x, coord.y, defaultEquipment[rndEquipment].Equipmenttype, defaultEquipment[rndEquipment].Damage, defaultEquipment[rndEquipment].Defense, defaultEquipment[rndEquipment].renderChar, defaultEquipment[rndEquipment].Name));
+				}
 			}
 		}
 
@@ -117,21 +148,60 @@ namespace RogueGame.Control
 		{
 			//Todo: add sql
 			//throw new NotImplementedException();
+			int rndCount = rnd.Next(0, maxPotionCount);
+			if (rooms.GetArea() < 60)
+			{
+				rndCount = rnd.Next(0, 1);
+			}
+
+			for (int i = 0; i < rndCount; i++)
+			{
+				int rndType = rnd.Next(0, Enum.GetNames(typeof(PotionType)).Length);
+				int rndValue = rnd.Next(minPotionValue, MaxPotionValue + 1);
+				if((PotionType)rndType == PotionType.Atack || (PotionType)rndType == PotionType.Defense)
+				{
+					rndValue = 1;
+				}
+				
+
+				ArrayElementsStruct coord = GetRandomCoord(rooms);
+				if (coord.x != -1 && coord.y != -1)
+				{
+					rooms.AddReplaceObject(new Potion(coord.x, coord.y, rndValue, (PotionType)rndType));
+				}
+			}
 		}
 		internal void SpawnDoorToNextLvl(Room rooms)
 		{
 			//throw new NotImplementedException();
+
+
+			ArrayElementsStruct coord = GetRandomCoord(rooms);
+			if (coord.x != -1 && coord.y != -1)
+			{
+				rooms.AddReplaceObject(new Door(coord.x, coord.y));
+			}
 		}
+
+
+
 		private ArrayElementsStruct GetRandomCoord(Room rooms)
 		{
 			int x = rnd.Next(2, rooms.Width - 2);
 			int y = rnd.Next(2, rooms.Height - 2);
+			int exitCounter = 20;
 			ArrayElementsStruct coord = rooms.ArrayElementsToXY(x, y);
-			while (rooms.GetFirstObject(coord.x, coord.y) != null)
+			while (rooms.GetFirstObject(coord.x, coord.y) != null || exitCounter <= 0)
 			{
 				x = rnd.Next(2, rooms.Width - 2);
 				y = rnd.Next(2, rooms.Height - 2);
 				coord = rooms.ArrayElementsToXY(x, y);
+				exitCounter--;
+				
+			}
+			if(exitCounter <= 0)
+			{
+				return new ArrayElementsStruct(-1, -1);
 			}
 			return coord;
 		}

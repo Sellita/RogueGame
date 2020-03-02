@@ -15,8 +15,4 @@
     </ApplicationDefinition>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Control\Menu\" />
-  </ItemGroup>
-
 </Project>

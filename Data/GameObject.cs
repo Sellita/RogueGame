@@ -10,6 +10,8 @@ namespace RogueGame.Data
 		internal bool isColizionable { get; set; }
 		internal bool IsExplored { get; set; }
 		internal char renderChar;
+		internal ConsoleColor renderFgColor;
+		
 		internal int x;
 		internal int y;
 	}

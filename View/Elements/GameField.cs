@@ -79,12 +79,19 @@ namespace RogueGame.View.Elements
 		{
 			int lx = Console.CursorLeft;
 			int ly = Console.CursorTop;
+			ConsoleColor fgColor = Console.ForegroundColor;
 
+			if (gameObject.renderFgColor != ConsoleColor.Black)//TODO: change whend added background
+			{
+				Console.ForegroundColor = gameObject.renderFgColor;
+			}
 			Console.SetCursorPosition(X + gameObject.x, Y + gameObject.y);
+			
 
 			Console.Write(gameObject.renderChar);
 
 			Console.SetCursorPosition(lx, ly);
+			Console.ForegroundColor = fgColor;
 		}
 
 		public void RenderCoord(int x, int y, char c)

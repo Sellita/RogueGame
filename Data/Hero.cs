@@ -12,7 +12,8 @@ namespace RogueGame.Data
 		private int hp;
 		private int def;
 		private int damage;
-		public const int Basedamage = 4;
+		private int basedamage = 4;
+		private int baseDef = 0;
 		private int speed;
 
 		Equipment helmet;
@@ -20,6 +21,8 @@ namespace RogueGame.Data
 		Equipment panties;
 		Equipment boots;
 		Equipment gun;
+
+		public int gold { get; set; } = 0;//toodo move in inventory
 
 		public Inventory Inventory { get; set; }
 		public Hero(string name, int inventorySpace)
@@ -47,6 +50,9 @@ namespace RogueGame.Data
 		internal Equipment Panties { get => panties; set => panties = value; }
 		internal Equipment Boots { get => boots; set => boots = value; }
 		internal Equipment Gun { get => gun; set => gun = value; }
+		public int Basedamage { get => basedamage; set { basedamage = value; RecalculateStats(); }  }
+
+		public int BaseDef { get => baseDef; set { baseDef = value; RecalculateStats(); } }
 
 		public GameObject Equip(GameObject obj)
 		{
@@ -137,9 +143,9 @@ namespace RogueGame.Data
 			return obj;
 		}
 
-		private void RecalculateStats()
+		public void RecalculateStats()
 		{
-			def = 0;
+			def = baseDef;
 			if (helmet != null)
 			{
 				def += helmet.Defense;

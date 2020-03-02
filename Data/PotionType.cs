@@ -4,7 +4,11 @@ using System.Text;
 
 namespace RogueGame.Data
 {
-	class Potions
+	enum PotionType
 	{
+		Health,
+		Speed,
+		Defense,
+		Atack
 	}
 }
