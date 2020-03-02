@@ -59,37 +59,41 @@ namespace RogueGame.Control
 
 		private void AddStat()
 		{
-			switch (activeId)
+			if (hero.Stats > 0)
 			{
-				case 0://demagee
-					hero.Basedamage++;
-					StatsWindow.RenderItem(0, hero.Damage.ToString());
-					
-					break;
-				case 1://def
-					hero.BaseDef++;
-					StatsWindow.RenderItem(1, hero.Def.ToString());
-					break;
-				case 2://speed
-					hero.Speed++;
-					StatsWindow.RenderItem(2, hero.Speed.ToString());
-					break;
-				case 3://health
-					hero.Health++;
-					StatsWindow.RenderItem(3, hero.Health.ToString());
-					break;
-				default:
-					break;
+				switch (activeId)
+				{
+					case 0://demagee
+						hero.Basedamage++;
+						StatsWindow.RenderItem(0, hero.Damage.ToString());
+
+						break;
+					case 1://def
+						hero.BaseDef++;
+						StatsWindow.RenderItem(1, hero.Def.ToString());
+						break;
+					case 2://speed
+						hero.Speed++;
+						StatsWindow.RenderItem(2, hero.Speed.ToString());
+						break;
+					case 3://health
+						hero.Health++;
+						StatsWindow.RenderItem(3, hero.Health.ToString());
+						break;
+					default:
+						break;
+				}
+
+				hero.Stats--;
+				RenderHero();
 			}
-			hero.Stats--;
-			RenderHero();
 			//RenderHeroStats();
 		}
 
 		private void RenderHero()
 		{
 			StatsWindow.SetExp(hero.Exp.ToString());
-			StatsWindow.SetPoints(hero.Stats.ToString());
+			StatsWindow.SetPoints(hero.Stats);
 			StatsWindow.SetLevel(hero.Lvl.ToString());
 
 

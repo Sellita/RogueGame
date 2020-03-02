@@ -36,7 +36,9 @@ namespace RogueGame.Control
 		private const int minPotionValue = 5;
 		private const int MaxPotionValue = 15;
 		private const int EnemyMinAtack = 1;
+		private const int EnemyMinhp = 5;
 		private const int EnemyMaxAtack = 7;
+		private const int EnemyMaxhp = 20;
 
 		public Spawner()
 		{
@@ -91,11 +93,12 @@ namespace RogueGame.Control
 			for (int i = 0; i < rndEnemyCount; i++)
 			{
 				int rndEnemyAtack = rnd.Next(EnemyMinAtack + (lvl*3), EnemyMaxAtack + 1 + (lvl * 3));
+				int rndEnemyHp = rnd.Next(EnemyMinhp + (lvl*3), EnemyMaxhp + 1 + (lvl * 3));
 				int rndEnemy = rnd.Next(0, defaultEnemys.Count);
 				ArrayElementsStruct coord = GetRandomCoord(rooms);
 				if (coord.x != -1 && coord.y != -1)
 				{
-					rooms.AddReplaceObject(new Enemy(coord.x, coord.y, defaultEnemys[rndEnemy].renderChar, defaultEnemys[rndEnemy].Health, defaultEnemys[rndEnemy].Damage, rndExpCount));
+					rooms.AddReplaceObject(new Enemy(coord.x, coord.y, defaultEnemys[rndEnemy].renderChar, rndEnemyHp, rndEnemyAtack, rndExpCount));
 				}
 			}
 			

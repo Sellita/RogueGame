@@ -46,9 +46,14 @@ namespace RogueGame.View.Windows
 			this.exp.Data = data;
 		}
 
-		public void SetPoints(string data)
+		public void SetPoints(int data)
 		{
-			this.points.Data = data;
+			this.points.Data = data.ToString();
+			if(data == 0)
+			{
+				keyInfoHolder2.Data = "";
+				keyInfoHolder3.Data = "";
+			}
 		}	
 		public void SetLevel(string data)
 		{
