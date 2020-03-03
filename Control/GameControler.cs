@@ -62,7 +62,7 @@ namespace RogueGame.Control
 			//todo changee
 
 			AddRoadsToRooms(); //UNCOMENT
-			gameWindow.Render();//todo remove
+			//gameWindow.Render();//todo remove
 
 			
 			
